@@ -146,12 +146,28 @@ unsigned int stack_size(const hstack_t hstack) {
     return count;
 }
 
-//
-void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size)
-{
-    UNUSED(hstack);
-    UNUSED(data_in);
-    UNUSED(size);
+//Добавление элемента в стек
+void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size) {
+    // Проверяем валидность входных данных
+    if (!stack_valid_handler(hstack) || data_in == NULL || size == 0) {
+        return;
+    }
+    
+    int index = (int)hstack;
+    
+    // Создаем новый элемент
+    struct stack_item* new_item = (struct stack_item*)malloc(sizeof(struct stack_item) + size);
+    if (new_item == NULL) {
+        return;
+    }
+    
+    // Заполняем данные элемента
+    new_item->previous = g_table.entries[index].top;
+    new_item->data_size = size;
+    memcpy(new_item->data, data_in, size);
+    
+    // Обновляем вершину стека
+    g_table.entries[index].top = new_item;
 }
 
 unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int size)
