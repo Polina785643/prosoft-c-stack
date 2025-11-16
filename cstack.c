@@ -40,7 +40,6 @@ static int find_free_slot(void) {
 }
 
 //Удваивает размер таблицы когда все слоты заняты
-
 static int expand_table_if_needed(void) {
     unsigned int new_size = g_table.size * 2;
     struct stack_entry* new_entries = (struct stack_entry*)realloc(
@@ -62,7 +61,7 @@ static int expand_table_if_needed(void) {
 }
 
 
-
+//Cоздание нового стека
 hstack_t stack_new(void) {
     // Инициализируем таблицу при первом вызове
     if (g_table.entries == NULL) {
@@ -93,16 +92,33 @@ hstack_t stack_new(void) {
     return (hstack_t)slot;
 }
 
-void stack_free(const hstack_t hstack)
-{
-    UNUSED(hstack);
+void stack_free(const hstack_t hstack) {
+    if (!stack_valid_handler(hstack)) {
+        return;
+    }
+    
+    int index = (int)hstack;
+    
+    // Освобождаем все элементы стека
+    struct stack_item* current = g_table.entries[index].top;
+    while (current != NULL) {
+        struct stack_item* prev = current->previous;
+        free(current);
+        current = prev;
+    }
+    
+    // Освобождаем запись в таблице
+    g_table.entries[index].reserved = 0;
+    g_table.entries[index].top = NULL;
 }
+
 
 int stack_valid_handler(const hstack_t hstack)
 {
     UNUSED(hstack);
     return 1;
 }
+
 
 unsigned int stack_size(const hstack_t hstack)
 {
