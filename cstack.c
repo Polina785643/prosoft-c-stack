@@ -63,9 +63,34 @@ static int expand_table_if_needed(void) {
 
 
 
-hstack_t stack_new(void)
-{
-    return -1;
+hstack_t stack_new(void) {
+    // Инициализируем таблицу при первом вызове
+    if (g_table.entries == NULL) {
+        g_table.size = 10;
+        g_table.entries = (struct stack_entry*)calloc(g_table.size, sizeof(struct stack_entry));
+        if (g_table.entries == NULL) {
+            return -1;
+        }
+    }
+    
+    // Находим свободный слот
+    int slot = find_free_slot();
+    if (slot == -1) {
+        // Пытаемся расширить таблицу
+        if (!expand_table_if_needed()) {
+            return -1;
+        }
+        slot = find_free_slot();
+        if (slot == -1) {
+            return -1;
+        }
+    }
+    
+    // Помечаем слот как занятый
+    g_table.entries[slot].reserved = 1;
+    g_table.entries[slot].top = NULL;
+    
+    return (hstack_t)slot;
 }
 
 void stack_free(const hstack_t hstack)
