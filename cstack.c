@@ -128,12 +128,25 @@ int stack_valid_handler(const hstack_t hstack) {
     return g_table.entries[index].reserved == 1;
 }
 
-unsigned int stack_size(const hstack_t hstack)
-{
-    UNUSED(hstack);
-    return 0;
+//Размер стека
+unsigned int stack_size(const hstack_t hstack) {
+    if (!stack_valid_handler(hstack)) {
+        return 0;
+    }
+    
+    int index = (int)hstack;
+    struct stack_item* current = g_table.entries[index].top;
+    unsigned int count = 0;
+    
+    while (current != NULL) {
+        count++;
+        current = current->previous;
+    }
+    
+    return count;
 }
 
+//
 void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size)
 {
     UNUSED(hstack);
