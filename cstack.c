@@ -10,6 +10,20 @@ struct stack_element {
     char data[0];  // данные 
 };
 
+// Структура для записи о стеке в таблице
+struct stack_entry {
+    int reserved;       // 1 если запись занята, 0 если свободна
+    struct node* stack; //указатель на последний добавленный элемент
+};
+
+// Глобальная таблица стеков
+struct stack_entries_table {
+    unsigned int size;           //текущий размер таблицы
+    struct stack_entry* entries; 
+};
+
+static struct stack_entries_table g_table = {0u, NULL};
+
 hstack_t stack_new(void)
 {
     return -1;
