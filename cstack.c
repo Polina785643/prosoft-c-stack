@@ -113,12 +113,20 @@ void stack_free(const hstack_t hstack) {
 }
 
 
-int stack_valid_handler(const hstack_t hstack)
-{
-    UNUSED(hstack);
-    return 1;
+//Проверка хэндлера
+int stack_valid_handler(const hstack_t hstack) {
+    if (hstack < 0) {
+        return 0;
+    }
+    
+    int index = (int)hstack;
+    
+    if (g_table.entries == NULL || index >= (int)g_table.size) {
+        return 0;
+    }
+    
+    return g_table.entries[index].reserved == 1;
 }
-
 
 unsigned int stack_size(const hstack_t hstack)
 {
