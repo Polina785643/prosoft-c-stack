@@ -1,7 +1,14 @@
 #include "cstack.h"
-#include <stddef.h>
+#include <stdlib.h> //для функций работы с памятью 
 
 #define UNUSED(VAR) (void)(VAR)
+
+// Структура элемета  стека
+struct stack_element {
+    struct *stack_element prev; //указатель на предыдущий элемент 
+    unsigned int size; //размер данных, хранящихся в текущем элементе
+    char data[0];  // данные 
+};
 
 hstack_t stack_new(void)
 {
