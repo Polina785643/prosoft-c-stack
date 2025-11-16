@@ -2,7 +2,7 @@
 #include <stdlib.h> //для функций работы с памятью 
 #include <string.h>  // для memcpy
 
-#define UNUSED(VAR) (void)(VAR)
+
 
 // Структура элемета  стека
 struct stack_element {
@@ -170,11 +170,31 @@ void stack_push(const hstack_t hstack, const void* data_in, const unsigned int s
     g_table.entries[index].top = new_item;
 }
 
-unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int size)
-{
-    UNUSED(hstack);
-    UNUSED(data_out);
-    UNUSED(size);
-    return 0;
+//Извлечение элемента из стека
+unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int size) {
+    // Проверяем валидность входных данных
+    if (!stack_valid_handler(hstack) || data_out == NULL || size == 0) {
+        return 0;
+    }
+    
+    int index = (int)hstack;
+    struct stack_item* top = g_table.entries[index].top;
+    
+    // Проверяем, не пуст ли стек
+    if (top == NULL) {
+        return 0;
+    }
+    
+    // Определяем, сколько данных можно скопировать
+    unsigned int copy_size = (size < top->data_size) ? size : top->data_size;
+    memcpy(data_out, top->data, copy_size);
+    
+    // Обновляем вершину стека
+    g_table.entries[index].top = top->previous;
+    
+    // Освобождаем элемент
+    free(top);
+    
+    return copy_size;
 }
 
