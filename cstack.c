@@ -1,5 +1,6 @@
 #include "cstack.h"
 #include <stdlib.h> //для функций работы с памятью 
+#include <string.h>  // для memcpy
 
 #define UNUSED(VAR) (void)(VAR)
 
@@ -23,6 +24,44 @@ struct stack_entries_table {
 };
 
 static struct stack_entries_table g_table = {0u, NULL};
+
+// Вспомогательные функции для работы с таблицей стеков
+static int expand_table_if_needed(void);
+static int find_free_slot(void);
+
+//Функция для нахождения первого свободного слота в таблице стеков
+static int find_free_slot(void) {
+    for (unsigned int i = 0; i < g_table.size; ++i) {
+        if (g_table.entries[i].reserved == 0) {
+            return (int)i;  // Нашли свободный слот
+        }
+    }
+    return -1;  // Все слоты заняты
+}
+
+//Удваивает размер таблицы когда все слоты заняты
+
+static int expand_table_if_needed(void) {
+    unsigned int new_size = g_table.size * 2;
+    struct stack_entry* new_entries = (struct stack_entry*)realloc(
+        g_table.entries, new_size * sizeof(struct stack_entry));
+    
+    if (new_entries == NULL) {
+        return 0;
+    }
+    
+    // Инициализируем новую часть таблицы
+    for (unsigned int i = g_table.size; i < new_size; ++i) {
+        new_entries[i].reserved = 0;
+        new_entries[i].top = NULL;
+    }
+    
+    g_table.entries = new_entries;
+    g_table.size = new_size;
+    return 1;
+}
+
+
 
 hstack_t stack_new(void)
 {
