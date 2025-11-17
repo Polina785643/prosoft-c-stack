@@ -2,11 +2,9 @@
 #include <stdlib.h> //для функций работы с памятью 
 #include <string.h>  // для memcpy
 
-
-
-// Структура элемета  стека
-struct stack_element {
-    struct *stack_element prev; //указатель на предыдущий элемент 
+// Структура элемента стека
+struct stack_item {
+    struct stack_item* prev; //указатель на предыдущий элемент 
     unsigned int size; //размер данных, хранящихся в текущем элементе
     char data[0];  // данные 
 };
@@ -14,7 +12,7 @@ struct stack_element {
 // Структура для записи о стеке в таблице
 struct stack_entry {
     int reserved;       // 1 если запись занята, 0 если свободна
-    struct node* stack; //указатель на последний добавленный элемент
+    struct stack_item* top; //указатель на последний добавленный элемент - ИСПРАВЛЕНО: node -> stack_item
 };
 
 // Глобальная таблица стеков
@@ -60,7 +58,6 @@ static int expand_table_if_needed(void) {
     return 1;
 }
 
-
 //Cоздание нового стека
 hstack_t stack_new(void) {
     // Инициализируем таблицу при первом вызове
@@ -100,9 +97,9 @@ void stack_free(const hstack_t hstack) {
     int index = (int)hstack;
     
     // Освобождаем все элементы стека
-    struct stack_item* current = g_table.entries[index].top;
+    struct stack_item* current = g_table.entries[index].top; // ИСПРАВЛЕНО: stack_element -> stack_item
     while (current != NULL) {
-        struct stack_item* prev = current->previous;
+        struct stack_item* prev = current->prev; // ИСПРАВЛЕНО: previous -> prev
         free(current);
         current = prev;
     }
@@ -111,7 +108,6 @@ void stack_free(const hstack_t hstack) {
     g_table.entries[index].reserved = 0;
     g_table.entries[index].top = NULL;
 }
-
 
 //Проверка хэндлера
 int stack_valid_handler(const hstack_t hstack) {
@@ -135,12 +131,12 @@ unsigned int stack_size(const hstack_t hstack) {
     }
     
     int index = (int)hstack;
-    struct stack_item* current = g_table.entries[index].top;
+    struct stack_item* current = g_table.entries[index].top; // ИСПРАВЛЕНО: stack_element -> stack_item
     unsigned int count = 0;
     
     while (current != NULL) {
         count++;
-        current = current->previous;
+        current = current->prev; // ИСПРАВЛЕНО: previous -> prev
     }
     
     return count;
@@ -156,14 +152,14 @@ void stack_push(const hstack_t hstack, const void* data_in, const unsigned int s
     int index = (int)hstack;
     
     // Создаем новый элемент
-    struct stack_item* new_item = (struct stack_item*)malloc(sizeof(struct stack_item) + size);
+    struct stack_item* new_item = (struct stack_item*)malloc(sizeof(struct stack_item) + size); // ИСПРАВЛЕНО: stack_element -> stack_item
     if (new_item == NULL) {
         return;
     }
     
     // Заполняем данные элемента
-    new_item->previous = g_table.entries[index].top;
-    new_item->data_size = size;
+    new_item->prev = g_table.entries[index].top; // ИСПРАВЛЕНО: previous -> prev
+    new_item->size = size; // ИСПРАВЛЕНО: data_size -> size
     memcpy(new_item->data, data_in, size);
     
     // Обновляем вершину стека
@@ -178,7 +174,7 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
     }
     
     int index = (int)hstack;
-    struct stack_item* top = g_table.entries[index].top;
+    struct stack_item* top = g_table.entries[index].top; // ИСПРАВЛЕНО: stack_element -> stack_item
     
     // Проверяем, не пуст ли стек
     if (top == NULL) {
@@ -186,15 +182,14 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
     }
     
     // Определяем, сколько данных можно скопировать
-    unsigned int copy_size = (size < top->data_size) ? size : top->data_size;
+    unsigned int copy_size = (size < top->size) ? size : top->size; // ИСПРАВЛЕНО: data_size -> size
     memcpy(data_out, top->data, copy_size);
     
     // Обновляем вершину стека
-    g_table.entries[index].top = top->previous;
+    g_table.entries[index].top = top->prev; // ИСПРАВЛЕНО: previous -> prev
     
     // Освобождаем элемент
     free(top);
     
     return copy_size;
 }
-
