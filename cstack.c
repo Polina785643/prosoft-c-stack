@@ -90,6 +90,11 @@ hstack_t stack_new(void) {
 }
 
 void stack_free(const hstack_t hstack) {
+    // Проверяем на отрицательный хэндлер
+    if (hstack < 0) {
+        return;
+    }
+    
     if (stack_valid_handler(hstack) == 0) {
         return;
     }
@@ -193,3 +198,4 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
     
     return copy_size;
 }
+
