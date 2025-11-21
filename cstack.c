@@ -12,7 +12,7 @@ struct stack_item {
 // Структура для записи о стеке в таблице
 struct stack_entry {
     int reserved;       // 1 если запись занята, 0 если свободна
-    struct stack_item* top; //указатель на последний добавленный элемент - ИСПРАВЛЕНО: node -> stack_item
+    struct stack_item* top; //указатель на последний добавленный элемент
 };
 
 // Глобальная таблица стеков
@@ -90,16 +90,16 @@ hstack_t stack_new(void) {
 }
 
 void stack_free(const hstack_t hstack) {
-    if (!stack_valid_handler(hstack)) {
+    if (stack_valid_handler(hstack) == 0) {
         return;
     }
     
     int index = (int)hstack;
     
     // Освобождаем все элементы стека
-    struct stack_item* current = g_table.entries[index].top; // ИСПРАВЛЕНО: stack_element -> stack_item
+    struct stack_item* current = g_table.entries[index].top;
     while (current != NULL) {
-        struct stack_item* prev = current->prev; // ИСПРАВЛЕНО: previous -> prev
+        struct stack_item* prev = current->prev;
         free(current);
         current = prev;
     }
@@ -112,31 +112,31 @@ void stack_free(const hstack_t hstack) {
 //Проверка хэндлера
 int stack_valid_handler(const hstack_t hstack) {
     if (hstack < 0) {
-        return 0;
+        return 1;
     }
     
     int index = (int)hstack;
     
     if (g_table.entries == NULL || index >= (int)g_table.size) {
-        return 0;
+        return 1;
     }
     
-    return g_table.entries[index].reserved == 1;
+    return g_table.entries[index].reserved == 0;
 }
 
 //Размер стека
 unsigned int stack_size(const hstack_t hstack) {
-    if (!stack_valid_handler(hstack)) {
+    if (stack_valid_handler(hstack) == 0) {
         return 0;
     }
     
     int index = (int)hstack;
-    struct stack_item* current = g_table.entries[index].top; // ИСПРАВЛЕНО: stack_element -> stack_item
+    struct stack_item* current = g_table.entries[index].top;
     unsigned int count = 0;
     
     while (current != NULL) {
         count++;
-        current = current->prev; // ИСПРАВЛЕНО: previous -> prev
+        current = current->prev;
     }
     
     return count;
@@ -145,21 +145,21 @@ unsigned int stack_size(const hstack_t hstack) {
 //Добавление элемента в стек
 void stack_push(const hstack_t hstack, const void* data_in, const unsigned int size) {
     // Проверяем валидность входных данных
-    if (!stack_valid_handler(hstack) || data_in == NULL || size == 0) {
+    if (stack_valid_handler(hstack) == 0 || data_in == NULL || size == 0) {
         return;
     }
     
     int index = (int)hstack;
     
     // Создаем новый элемент
-    struct stack_item* new_item = (struct stack_item*)malloc(sizeof(struct stack_item) + size); // ИСПРАВЛЕНО: stack_element -> stack_item
+    struct stack_item* new_item = (struct stack_item*)malloc(sizeof(struct stack_item) + size);
     if (new_item == NULL) {
         return;
     }
     
     // Заполняем данные элемента
-    new_item->prev = g_table.entries[index].top; // ИСПРАВЛЕНО: previous -> prev
-    new_item->size = size; // ИСПРАВЛЕНО: data_size -> size
+    new_item->prev = g_table.entries[index].top;
+    new_item->size = size;
     memcpy(new_item->data, data_in, size);
     
     // Обновляем вершину стека
@@ -169,12 +169,12 @@ void stack_push(const hstack_t hstack, const void* data_in, const unsigned int s
 //Извлечение элемента из стека
 unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int size) {
     // Проверяем валидность входных данных
-    if (!stack_valid_handler(hstack) || data_out == NULL || size == 0) {
+    if (stack_valid_handler(hstack) == 0 || data_out == NULL || size == 0) {
         return 0;
     }
     
     int index = (int)hstack;
-    struct stack_item* top = g_table.entries[index].top; // ИСПРАВЛЕНО: stack_element -> stack_item
+    struct stack_item* top = g_table.entries[index].top;
     
     // Проверяем, не пуст ли стек
     if (top == NULL) {
@@ -182,11 +182,11 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
     }
     
     // Определяем, сколько данных можно скопировать
-    unsigned int copy_size = (size < top->size) ? size : top->size; // ИСПРАВЛЕНО: data_size -> size
+    unsigned int copy_size = (size < top->size) ? size : top->size;
     memcpy(data_out, top->data, copy_size);
     
     // Обновляем вершину стека
-    g_table.entries[index].top = top->prev; // ИСПРАВЛЕНО: previous -> prev
+    g_table.entries[index].top = top->prev;
     
     // Освобождаем элемент
     free(top);
