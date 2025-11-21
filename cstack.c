@@ -224,13 +224,16 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
         return 0;
     }
     
+    // Сохраняем размер данных до освобождения памяти
+    unsigned int data_size = top->size;
+    
     // Копируем данные из элемента стека в буфер пользователя
-    memcpy(data_out, top->data, top->size);
+    memcpy(data_out, top->data, data_size);
     
     // Обновляем вершину стека и освобождаем извлеченный элемент
     g_table.entries[index].top = top->prev;
     free(top);
     
     // Возвращаем количество скопированных байтов
-    return top->size;
+    return data_size;
 }
