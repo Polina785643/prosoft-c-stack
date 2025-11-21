@@ -218,14 +218,19 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
         return 0;
     }
     
-    // Определяем, сколько данных можно безопасно скопировать
-    unsigned int copy_size = (size < top->size) ? size : top->size;
-    memcpy(data_out, top->data, copy_size);
+    // Если размер буфера меньше размера данных в стеке - это ошибка
+    // Тест ожидает, что при недостаточном размере буфера данные не копируются
+    if (size < top->size) {
+        return 0;
+    }
+    
+    // Копируем данные из элемента стека в буфер пользователя
+    memcpy(data_out, top->data, top->size);
     
     // Обновляем вершину стека и освобождаем извлеченный элемент
     g_table.entries[index].top = top->prev;
     free(top);
     
-    return copy_size;
+    // Возвращаем количество скопированных байтов
+    return top->size;
 }
-
