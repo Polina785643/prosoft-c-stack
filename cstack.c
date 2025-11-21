@@ -204,7 +204,8 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
         return 0;
     }
     
-    // Проверяем валидность параметров
+    // Проверяем валидность параметров ДО обращения к стеку
+    // Это предотвращает извлечение данных при невалидных параметрах
     if (stack_valid_handler(hstack) != 0 || data_out == NULL || size == 0) {
         return 0;
     }
@@ -227,3 +228,4 @@ unsigned int stack_pop(const hstack_t hstack, void* data_out, const unsigned int
     
     return copy_size;
 }
+
